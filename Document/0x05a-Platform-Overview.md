@@ -363,20 +363,21 @@ FragmentManager fm = getFragmentManager();
 
 Fragments do not necessarily have a user interface: they can be a convenient and efficient way to manage background operations dealing with user interface in an app. For instance when a fragment is declared as persistent while its parent activity may be destroyed and created again.
 
+
 ##### Inter-Process Communication
 
 As we know, every process on Android has its own sandboxed address space. Inter-process communication (IPC) facilities enable apps to exchange signals and data in a (hopefully) secure way. Instead of relying on the default Linux IPC facilities, IPC on Android is done through Binder, a custom implementation of OpenBinder. Most Android system services, as well as all high-level IPC services, depend on Binder.
 
 The term *Binder* stands for a lot of different things, including:
 
-- Binder Driver - The kernel-level driver
-- Binder Protocol - Low-level ioctl-based protocol used to communicate with the binder driver
-- IBinder Interface - well-defined behavior Binder objects implement
-- Binder object - Generic implementation of the IBinder interface
-- Binder service - Implementation of the Binder object. For example, location service, sensor service,...
-- Binder client - An object using the binder service
+- Binder Driver: kernel-level driver
+- Binder Protocol: low-level ioctl-based protocol used to communicate with the binder driver
+- IBinder Interface: well-defined behavior Binder objects implement
+- Binder object: generic implementation of the IBinder interface
+- Binder service: implementation of the Binder object. For example, location service, sensor service, etc.
+- Binder client: object using the binder service.
 
-In the Binder framework, a client-server communication model is used. To use IPC functionality, apps call IPC methods in proxy objects. The proxy object transparently marshalls the call parameters into a *parcel* and sends a transaction to the Binder server, which is implemented as a character driver (/dev/binder). The server holds a thread pool for handling incoming requests, and is responsible for delivering messages to the destination object. From the view of the client app, all of this looks like a regular method call - all the heavy lifting is done by the binder framework.
+Binder framework uses client-server communication model. To use IPC functionality, apps call IPC methods in proxy objects. The proxy object transparently marshals the call parameters into a *parcel* and sends a transaction to the Binder server, which is implemented as a character driver (/dev/binder). The server holds a thread pool for handling incoming requests, and is responsible for delivering messages to the destination object. From the view of the client app, all this looks like a regular method call – all the heavy lifting is done by the binder framework.
 
 ![Binder Overview](Images/Chapters/0x05a/binder.jpg)
 *Binder Overview. Image source: [Android Binder by Thorsten Schreiber](https://www.nds.rub.de/media/attachments/files/2011/10/main.pdf)*
@@ -403,7 +404,7 @@ Found 99 services:
 
 #### Intents
 
-*Intent messaging* is a framework for asynchronous communication built on top of binder. This framework enables both point-to-point and publish-subscribe messaging. An *Intent* is a messaging object that can be used to request an action from another app component. Although intents facilitate communication between components in several ways, there are three fundamental use cases:
+*Intent messaging* is a framework for asynchronous communication built on top of the binder. This framework enables both point-to-point and publish-subscribe messaging. An *Intent* is a messaging object that can be used to request an action from another app component. Although intents facilitate communication between components in several ways, there are three fundamental use cases:
 
 - Starting an activity
     - An Activity represents a single screen in an app. You can start a new instance of an Activity by passing an Intent to startActivity(). The Intent describes the activity to start and carries any necessary data.
@@ -426,7 +427,7 @@ Implicit intents are sent to the system with a given action to perform on a give
     Intent intent = new Intent(Intent.MY_ACTION, Uri.parse("http://www.example.com"));
 ```
 
-An *intent filter* is an expression in an app's manifest file that specifies the type of intents that the component would like to receive. For instance, by declaring an intent filter for an activity, you make it possible for other apps to directly start your activity with a certain kind of intent. Likewise, if you do not declare any intent filters for an activity, then it can be started only with an explicit intent.
+An *intent filter* is an expression in the app's manifest file that specifies the type of intents that the component would like to receive. For instance, by declaring an intent filter for an activity, you make it possible for other apps to start your activity directly with a certain kind of intent. Likewise, if you do not declare any intent filters for an activity, then it can only be started with an explicit intent.
 
 Android uses intents to broadcast messages to apps, like an incoming call or SMS, important information on power supply (low battery for example) or network changes (loss of connection for instance). Extra data may be added to intents (through putExtra / getExtras).
 
@@ -437,13 +438,13 @@ Here is a short list of intents from the operating system. All constants are def
 - ACTION_NEW_OUTGOING_CALL
 - ACTION_TIMEZONE_CHANGED
 
-In order to improve security and privacy, a Local Broadcast Manager is used to send and receive intents within an app, without having them sent to the rest of the operating system. This is very useful to guarantee sensitive or private data do not leave the app perimeter (geolocation data for instance).
+In order to improve security and privacy, a Local Broadcast Manager is used to send and receive intents within the app, without having them sent to the rest of the operating system. This is very useful to guarantee sensitive or private data do not leave the app perimeter (geolocation data for instance).
 
 ##### Broadcast Receivers
 
-Broadcast Receivers are components that allow to receive notifications sent from other apps and from the system itself. This way, apps can react to events (either internal, from other apps or from the operating system). They are generally used to update a user interface, start services, update content or create user notifications.
+Broadcast Receivers are components that allow receiving notifications sent from other apps and from the system itself. This way, apps can react to events (either internal, from other apps or from the operating system). They are generally used to update the user interface, start services, update content or create user notifications.
 
-Broadcast Receivers need to be declared in the Manifest file of the app. Any Broadcast Receiver must be associated to an intent filter in the manifest to specify which actions it is meant to listen with which kind of data. If they are not declared, the app will not listen to broadcasted messages. However, apps do not need to be started to receive intents: they are automatically started by the system when a relevant intent is raised.
+Broadcast Receivers need to be declared in the Manifest file of the app. Any Broadcast Receiver must be associated to an intent filter in the manifest to specify which actions it is meant to listen to and with which kind of data. If they are not declared, the app will not listen to broadcasted messages. However, apps do not need to be started to receive intents: they are automatically started by the system when a relevant intent is raised.
 
 An example of declaring a Broadcast Receiver with an Intent Filter in a manifest is:
 ```
@@ -454,17 +455,17 @@ An example of declaring a Broadcast Receiver with an Intent Filter in a manifest
 	</receiver>
 ```
 
-When receiving an implicit intent, Android will list all apps that have registered a given action in their filters. If more than one app is matching, then Android will list all those apps and will require the user to make a selection.
+When receiving an implicit intent Android will list all apps that have registered a given action in their filters. If more than one app is matching, then Android will list all those apps and will require the user to make a selection.
 
-An interesting feature concerning Broadcast Receivers is that they be assigned a priority; this way, an intent will be delivered to all receivers authorized to get them according to their priority.
+An interesting feature concerning Broadcast Receivers is that they can be assigned a priority; this way, an intent will be delivered to all receivers authorized to get them according to their priority.
 
 A Local Broadcast Manager can be used to make sure intents are received only from the internal app, and that any intent from any other app will be discarded. This is very useful to improve security.
 
 ##### Content Providers
 
-Android is using SQLite to store data permanently: as it is in Linux, data is stored in files. SQLite is an open-source, light and efficient technology for relational data storage that does not require much processing power, making it ideal for use in the mobile world. An entire API is available to the developer with specific classes (Cursor, ContentValues, SQLiteOpenHelper, ContentProvider, ContentResolver, ...).
+Android is using SQLite to store data permanently: like in Linux, data is stored in files. SQLite is an open-source, light and efficient technology for relational data storage that does not require much processing power making it ideal for the use in the mobile world. An entire API is available to the developer with specific classes (Cursor, ContentValues, SQLiteOpenHelper, ContentProvider, ContentResolver, ...).
 SQLite is not run in a separate process from a given app, but it is part of it.
-By default, a database belonging to a given app is only accessible to this app. However, Content Providers offer a great mechanism to abstract data sources (including databases, but also flat files) for a more easy use in an app; they also provide a standard and efficient mechanism to share data between apps, including native ones. In order to be accessible to other apps, content providers need to be explicitly declared in the Manifest file of the app that will share it. As long as Content Providers are not declared, they are not exported and can only be called by the app that creates them.
+By default, a database belonging to a given app is only accessible to this app. However, Content Providers offer a great mechanism to abstract data sources (including databases, but also flat files) for a more easy use in the app. They also provide a standard and efficient mechanism to share data between apps, including native ones. In order to be accessible to other apps, content providers need to be explicitly declared in the Manifest file of the app that will share it. As long as Content Providers are not declared, they are not exported and can only be called by the app that creates them.
 
 Content Providers are implemented through a URI addressing scheme: they all use the content:// model. Whatever the nature of sources is (SQLite database, flat file, ...), the addressing scheme is always the same, abstracting what sources are and offering a unique scheme to the developer. Content providers offer all regular operations on databases: create, read, update, delete. That means that any app with proper rights in its manifest file can manipulate the data from other apps.
 
